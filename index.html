@@ -70,7 +70,7 @@ p{margin:0}
 .head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px 60px;align-items:end;margin-bottom:48px}
 .head p{font-size:17px;max-width:52ch}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:12px}
+.card{background:rgba(16,18,22,.8);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:12px}
 .card .price{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;font-size:15px;color:var(--muted)}
 .card .price strong{color:var(--ink);font-size:20px;font-stretch:125%;white-space:nowrap}
 .note{margin-top:18px}
@@ -88,20 +88,25 @@ p{margin:0}
 
 /* process */
 .steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;position:relative}
-.steps li{padding:26px 24px 28px;border-radius:18px;background:var(--panel);border:1px solid var(--line)}
+.steps li{padding:26px 24px 28px;border-radius:18px;background:rgba(16,18,22,.8);border:1px solid var(--line)}
 .steps svg{width:34px;height:34px;margin-bottom:22px}
 .steps h3{margin-bottom:10px}
 .facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
-.facts div{padding:22px 24px;border-radius:18px;border:1px solid var(--line)}
+.facts div{padding:22px 24px;border-radius:18px;border:1px solid var(--line);background:rgba(10,11,13,.55)}
 .facts strong{display:block;font-stretch:125%;font-size:17px;margin-bottom:4px}
 
 /* booking */
-.book{background:linear-gradient(180deg,var(--bg),#0e1013)}
+/* silk: slow light moving over black paint, behind everything after the film */
+.after{position:relative;isolation:isolate}
+.silk-wrap{position:sticky;top:0;height:100vh;height:100svh;margin-bottom:-100vh;margin-bottom:-100svh;z-index:-1;pointer-events:none;background:var(--bg)}
+.silk-wrap canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.silk-wrap::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 120% 90% at 50% 45%,rgba(10,11,13,.15),rgba(10,11,13,.7))}
+#services{background:linear-gradient(var(--bg),rgba(10,11,13,0) 220px)}
 .bookgrid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(32px,6vw,90px)}
 .info{display:flex;flex-direction:column;gap:22px}
 .info dl{margin:12px 0 0;display:grid;gap:14px}
 .info dt{font-size:13px;color:var(--muted)}.info dd{margin:2px 0 0;font-size:17px}
-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:clamp(22px,3vw,36px)}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;background:rgba(16,18,22,.8);border:1px solid var(--line);border-radius:22px;padding:clamp(22px,3vw,36px)}
 .f{display:flex;flex-direction:column;gap:6px}.f.full{grid-column:1/-1}
 label{font-size:13px;color:var(--muted)}
 input,select,textarea{font:16px/1.4 "Archivo",sans-serif;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:48px;width:100%}
@@ -153,6 +158,8 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px 40px;justify-content:space-bet
   </div>
 </section>
 
+<div class="after">
+<div class="silk-wrap" id="silk" aria-hidden="true"></div>
 <section class="band" id="services">
   <div class="wrap">
     <div class="head">
@@ -220,6 +227,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px 40px;justify-content:space-bet
     </form>
   </div>
 </section>
+</div>
 </main>
 
 <footer>
@@ -337,6 +345,122 @@ form.addEventListener('submit',e=>{e.preventDefault();let ok=true;
   const nm=document.getElementById('name').value.trim(),sv=document.getElementById('service').value;
   done.textContent=`Thanks, ${nm}. This is a demo site, so no booking was sent. On the live site the studio would text you to confirm your ${sv==='Not sure yet'?'booking':sv.toLowerCase()}.`;
   form.classList.add('sent')});
+}
+</script>
+<script>
+/* Silk background, ported from React Bits <Silk /> to plain JavaScript */
+{
+const VERTEX=`#version 300 es
+in vec2 aPosition;
+void main(){gl_Position=vec4(aPosition,0.0,1.0);}`;
+const SILK=`
+uniform vec2 uView;uniform float uScale;uniform float uRotation;uniform float uTime;uniform float uWave;uniform float uRipple;uniform float uFold;
+uniform vec2 uShift;uniform vec4 uPointer;uniform vec2 uDrag;uniform vec4 uWaves[4];
+const float e=2.71828182845904523536;
+float noise(vec2 texCoord){float G=e;vec2 r=(G*sin(G*texCoord));return fract(r.x*r.y*(1.0+texCoord.x));}
+vec2 rotateUvs(vec2 uv,float angle){float c=cos(angle);float s=sin(angle);mat2 rot=mat2(c,-s,s,c);return rot*uv;}
+vec2 bend(vec2 uv){vec2 aspect=vec2(uView.x/uView.y,1.0);vec2 offset=(uv-uPointer.xy)*aspect;
+  float touch=uPointer.z*exp(-dot(offset,offset)/(uPointer.w*uPointer.w));uv-=uDrag*touch;
+  for(int i=0;i<4;i++){vec4 wave=uWaves[i];if(wave.w<=0.0)continue;vec2 q=(uv-wave.xy)*aspect;float dist=length(q);
+    float front=dist-wave.z;float ring=exp(-front*front*60.0)*wave.w;uv+=q/max(dist,0.0001)/aspect*ring*0.034*sin(front*34.0);}
+  return uv;}
+float silk(vec2 vUv){vec2 uv=rotateUvs(vUv*uScale,uRotation);vec2 tex=uv*uScale+uShift;float tOffset=uTime;
+  tex.y+=0.03*uWave*sin(8.0*tex.x-tOffset);
+  return 0.6+0.4*uFold*sin(5.0*(tex.x+tex.y+cos(3.0*tex.x+5.0*tex.y)+0.02*tOffset)+uRipple*sin(20.0*(tex.x+tex.y-0.1*tOffset)));}
+`;
+const FIELD=`#version 300 es
+precision highp float;
+${SILK}
+out vec4 outColor;
+void main(){vec2 vUv=gl_FragCoord.xy/uView;float pattern=silk(bend(vUv));float n=clamp((pattern-0.2)/0.8,0.0,1.0);outColor=vec4(pow(n,6.0),0.0,0.0,1.0);}`;
+const COMPOSITE=`#version 300 es
+precision highp float;
+${SILK}
+uniform sampler2D uBloom;uniform vec3 uColor;uniform vec3 uSheenColor;uniform float uNoiseIntensity;uniform float uDepth;uniform float uSheen;
+uniform float uGlow;uniform vec3 uLight;uniform vec2 uStep;uniform float uPresence;
+out vec4 outColor;
+vec3 softClip(vec3 c){vec3 over=max(c-0.75,0.0);return min(c,0.75)+0.25*(1.0-exp(-over*4.0));}
+void main(){
+  vec2 vUv=gl_FragCoord.xy/uView;vec2 coord=bend(vUv);float pattern=silk(coord);float rnd=noise(gl_FragCoord.xy);
+  float n=clamp((pattern-0.2)/0.8,0.0,1.0);
+  float gx=silk(coord+vec2(uStep.x,0.0))-pattern;float gy=silk(coord+vec2(0.0,uStep.y))-pattern;
+  vec3 normal=normalize(vec3(-gx*26.0,-gy*26.0,1.0));vec3 toLight=normalize(vec3(uLight.xy,0.85));
+  float relief=1.0+(dot(normal,toLight)-toLight.z)*1.8*uDepth;vec3 halfway=normalize(toLight+vec3(0.0,0.0,1.0));
+  float gloss=pow(max(dot(normal,halfway),0.0),48.0)*smoothstep(0.25,0.85,n);float crest=pow(n,5.0);
+  float shine=(gloss*0.85+crest*0.4)*uSheen*(1.0+uLight.z*0.6);
+  float bloom=0.0;
+  if(uGlow>0.0){bloom+=textureLod(uBloom,vUv,1.0).r*0.35;bloom+=textureLod(uBloom,vUv,2.0).r*0.3;bloom+=textureLod(uBloom,vUv,3.0).r*0.2;bloom+=textureLod(uBloom,vUv,4.0).r*0.15;}
+  float grain=rnd/15.0*uNoiseIntensity;float floorValue=mix(0.2,0.03,uDepth);
+  float curve=uDepth>0.0?pow(n,1.0+1.4*uDepth):n;float shade=uDepth>0.0?floorValue+(1.0-floorValue)*curve:pattern;
+  vec3 tone=mix(uColor,pow(uColor,vec3(1.45)),(1.0-n)*uDepth);vec3 lit=tone*shade*relief-vec3(grain);
+  vec3 tint=mix(uColor,uSheenColor,0.8);vec3 extra=tint*(shine+bloom*uGlow*0.55);float blend=clamp((uSheen+uGlow)*4.0,0.0,1.0);
+  vec3 result=mix(clamp(lit,0.0,1.0),clamp(softClip(lit+extra),0.0,1.0),blend);
+  outColor=vec4(result*uPresence,uPresence);
+}`;
+
+/* tuned for the brand: near-black paint, cool studio-lamp sheen, slow drift */
+const S={speed:.7,scale:1,color:'#2a2e35',sheenColor:'#dfe7f1',noiseIntensity:1.2,rotation:.35,sheen:.45,depth:.6,glow:.3,
+  ripple:1,wave:1,variation:3,mouseInteraction:true,interactionStrength:.6,intro:true};
+const container=document.getElementById('silk');
+const canvas=document.createElement('canvas');container.appendChild(canvas);
+const gl=canvas.getContext('webgl2',{alpha:true,premultipliedAlpha:true,antialias:false,depth:false,stencil:false,powerPreference:'high-performance'});
+const compile=(type,src)=>{const sh=gl.createShader(type);gl.shaderSource(sh,src);gl.compileShader(sh);if(gl.getShaderParameter(sh,gl.COMPILE_STATUS))return sh;gl.deleteShader(sh);return null};
+const link=frag=>{const v=compile(gl.VERTEX_SHADER,VERTEX),f=compile(gl.FRAGMENT_SHADER,frag),pr=gl.createProgram();if(!v||!f)return null;
+  gl.attachShader(pr,v);gl.attachShader(pr,f);gl.bindAttribLocation(pr,0,'aPosition');gl.linkProgram(pr);gl.deleteShader(v);gl.deleteShader(f);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return null;const u={},n=gl.getProgramParameter(pr,gl.ACTIVE_UNIFORMS);
+  for(let i=0;i<n;i++){const info=gl.getActiveUniform(pr,i);u[info.name.replace(/\[0\]$/,'')]=gl.getUniformLocation(pr,info.name)}return{program:pr,uniforms:u}};
+const field=gl&&link(FIELD),comp=gl&&link(COMPOSITE);
+if(gl&&field&&comp){
+  const hex=h=>{const m=h.replace('#','');return[0,2,4].map(i=>parseInt(m.slice(i,i+2),16)/255)};
+  const COLOR=hex(S.color),SHEEN=hex(S.sheenColor),LIGHT0=[-.55,.7],TILT=Math.hypot(...LIGHT0);
+  const vShift=(()=>{const w=k=>{const v=Math.sin(S.variation*12.9898+k*78.233)*43758.5453;return v-Math.floor(v)-.5};return[w(1)*6,w(2)*6]})();
+  const ease=t=>t*t*t*(t*(t*6-15)+10),clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+  const vao=gl.createVertexArray();gl.bindVertexArray(vao);const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+  const tex=gl.createTexture(),fb=gl.createFramebuffer(),tgt={w:0,h:0};
+  const sizeTarget=(w,h)=>{if(tgt.w===w&&tgt.h===h)return;tgt.w=w;tgt.h=h;gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex,0)};
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const view={w:1,h:1,r:1},pointer={x:0,y:0,inside:false},st={flow:0,intro:S.intro&&!reduce?0:1,touch:0,x:0,y:0,dx:0,dy:0,lx:LIGHT0[0],ly:LIGHT0[1]};
+  let raf=0,last=0,visible=false;
+  const shared=(u,w,h,unfold)=>{gl.uniform2f(u.uView,w,h);gl.uniform1f(u.uScale,S.scale);gl.uniform1f(u.uRotation,S.rotation);
+    gl.uniform1f(u.uTime,st.flow-1.6*(1-unfold));gl.uniform1f(u.uWave,S.wave);gl.uniform1f(u.uRipple,S.ripple);gl.uniform1f(u.uFold,.25+.75*unfold);
+    gl.uniform2f(u.uShift,vShift[0],vShift[1]);gl.uniform4f(u.uPointer,st.x/view.w,1-st.y/view.h,st.touch*S.interactionStrength,.32);
+    gl.uniform2f(u.uDrag,st.dx,st.dy);gl.uniform4fv(u.uWaves,new Float32Array(16))};
+  const render=()=>{const unfold=ease(st.intro),presence=1-Math.pow(1-st.intro,3);gl.bindVertexArray(vao);
+    sizeTarget(Math.max(1,Math.round(canvas.width/4)),Math.max(1,Math.round(canvas.height/4)));
+    gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.viewport(0,0,tgt.w,tgt.h);gl.useProgram(field.program);shared(field.uniforms,tgt.w,tgt.h,unfold);
+    gl.drawArrays(gl.TRIANGLES,0,3);gl.bindTexture(gl.TEXTURE_2D,tex);gl.generateMipmap(gl.TEXTURE_2D);
+    const c=comp.uniforms;gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,canvas.width,canvas.height);gl.useProgram(comp.program);
+    shared(c,canvas.width,canvas.height,unfold);gl.uniform3fv(c.uColor,COLOR);gl.uniform3fv(c.uSheenColor,SHEEN);gl.uniform1f(c.uNoiseIntensity,S.noiseIntensity);
+    gl.uniform1f(c.uDepth,S.depth);gl.uniform1f(c.uSheen,S.sheen);gl.uniform1f(c.uGlow,S.glow);gl.uniform3f(c.uLight,st.lx,st.ly,st.touch*S.interactionStrength);
+    gl.uniform2f(c.uStep,view.r/canvas.width,view.r/canvas.height);gl.uniform1f(c.uPresence,presence);
+    gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);gl.uniform1i(c.uBloom,0);gl.drawArrays(gl.TRIANGLES,0,3)};
+  const frame=now=>{raf=0;if(!visible||document.hidden)return;const dt=last?Math.min(.05,(now-last)/1000):1/60;last=now;
+    if(!reduce)st.flow+=dt*.1*S.speed;if(st.intro<1)st.intro=reduce?1:Math.min(1,st.intro+dt/2.2);
+    const engaged=S.mouseInteraction&&pointer.inside&&!reduce;if(engaged&&st.touch<.01){st.x=pointer.x;st.y=pointer.y}
+    const fol=1-Math.exp(-dt*10),px=st.x,py=st.y;st.x+=(pointer.x-st.x)*fol;st.y+=(pointer.y-st.y)*fol;
+    const vx=(st.x-px)/Math.max(dt,.001)/view.h,vy=(st.y-py)/Math.max(dt,.001)/view.h,db=1-Math.exp(-dt*4);
+    st.dx+=(clamp(vx*.03,-.06,.06)-st.dx)*db;st.dy+=(clamp(-vy*.03,-.06,.06)-st.dy)*db;
+    st.touch+=((engaged?1:0)-st.touch)*(1-Math.exp(-dt*(engaged?3.5:1.4)));
+    let gx=LIGHT0[0],gy=LIGHT0[1];if(engaged){const ax=(pointer.x/view.w-.5)*(view.w/view.h),ay=.5-pointer.y/view.h,rch=Math.hypot(ax,ay);
+      if(rch>.04){gx=ax/rch*TILT;gy=ay/rch*TILT}else{gx=st.lx;gy=st.ly}}
+    const lf=1-Math.exp(-dt*3);st.lx+=(gx-st.lx)*lf;st.ly+=(gy-st.ly)*lf;
+    render();if(!reduce||st.intro<1)raf=requestAnimationFrame(frame);else last=0};
+  const wake=()=>{if(!raf&&visible&&!document.hidden)raf=requestAnimationFrame(frame)};
+  const resize=()=>{const w=Math.max(1,container.clientWidth),h=Math.max(1,container.clientHeight);
+    const r=Math.min(window.devicePixelRatio||1,w<700?1:1.5);view.w=w;view.h=h;view.r=r;
+    canvas.width=Math.max(1,Math.round(w*r));canvas.height=Math.max(1,Math.round(h*r));render();wake()};
+  const silkResize=new ResizeObserver(resize);silkResize.observe(container);
+  const silkVisible=new IntersectionObserver(en=>{visible=en.some(x=>x.isIntersecting);if(visible){last=0;wake()}});silkVisible.observe(container);
+  window.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const r=container.getBoundingClientRect();
+    pointer.x=e.clientX-r.left;pointer.y=e.clientY-r.top;pointer.inside=pointer.x>=0&&pointer.y>=0&&pointer.x<=r.width&&pointer.y<=r.height;wake()},{passive:true});
+  document.documentElement.addEventListener('pointerleave',()=>{pointer.inside=false;wake()});
+  document.addEventListener('visibilitychange',()=>{last=0;wake()});
+  resize();
+}
 }
 </script>
 </body>

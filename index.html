@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en-IE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Obsidian Detailing Studio</title>
+<meta name="description" content="Private hand detailing for prestige cars and superbikes in Dublin.">
+<meta property="og:title" content="Obsidian Detailing Studio">
+<meta property="og:image" content="assets/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Michroma&display=swap" rel="stylesheet">
+<style>
+/* VOICE: quiet, nocturnal luxury; few words, lots of black, one sharp red.
+   IDEA: the page is the detailing bay at night, under the hexagon light ceiling.
+   PICTURE: the scroll-driven film itself: dirty, foamed, rinsed, revealed.
+   COLOUR and TYPE: studio black, cool lamp white, Ducati-red accent; Archivo expanded titles, Michroma wordmark.
+   LAYOUT: full-bleed sticky film, then calm dark bands: services, before/after, process, booking, footer. */
+:root{color-scheme:dark;--bg:#0a0b0d;--panel:#121418;--panel2:#181b20;--ink:#e9edf2;--muted:#9aa3ad;--line:rgba(233,237,242,.12);--red:#e0262f;--lamp:#f4f7fb}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Archivo",system-ui,sans-serif;overflow-x:clip}
+a{color:inherit}
+img{display:block;max-width:100%}
+h1,h2,h3{font-stretch:125%;font-weight:600;line-height:1.05;margin:0;text-wrap:balance}
+h1,h2{font-size:clamp(30px,4.2vw,50px);letter-spacing:-.01em}
+h3{font-size:20px;line-height:1.2}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.band{padding:clamp(56px,8vw,120px) max(5vw,20px)}
+.wrap{max-width:1240px;margin:0 auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;font:600 16px/1 "Archivo",sans-serif;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:background .2s,border-color .2s}
+.btn.red{background:var(--red);color:#fff}.btn.red:hover{background:#f03a42}
+.btn.ghost{border-color:rgba(233,237,242,.35);color:var(--ink);background:rgba(10,11,13,.35);backdrop-filter:blur(6px)}.btn.ghost:hover{border-color:var(--ink)}
+:focus-visible{outline:2px solid var(--lamp);outline-offset:3px}
+
+/* header */
+.top{position:fixed;inset:0 0 auto;z-index:20;display:flex;align-items:center;gap:24px;padding:14px max(5vw,20px);background:linear-gradient(rgba(10,11,13,.85),rgba(10,11,13,0))}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:15px/1 "Michroma",sans-serif;letter-spacing:.08em}
+.brand svg{width:26px;height:26px;flex:none}
+.nav{display:flex;gap:26px;margin-left:auto;font-size:15px}
+.nav a{text-decoration:none;color:var(--muted);padding:10px 0}.nav a:hover{color:var(--ink)}
+.top.solid{background:rgba(10,11,13,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top{transition:background .3s}
+.top .btn{min-height:42px;padding:0 18px;font-size:15px}
+
+/* film */
+.film{position:relative;height:620vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--bg)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%}
+/* captions live on the floor strip under the wheels (bottom ~20% of every shot) */
+.shade{position:absolute;inset:auto 0 0;height:26%;pointer-events:none;background:linear-gradient(to top,rgba(10,11,13,.88),rgba(10,11,13,.55) 40%,rgba(10,11,13,0))}
+.beat{position:absolute;left:0;right:0;bottom:clamp(30px,5.5vh,56px);max-width:1340px;margin:0 auto;padding:0 max(5vw,20px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 32px;opacity:0;visibility:hidden;will-change:opacity,transform}
+.beat h1,.beat h2{font-size:clamp(24px,2.7vw,38px);line-height:1.08;text-shadow:0 2px 18px rgba(0,0,0,.5)}
+.beat .label{font-size:13px;color:#c9d0d8;margin:0 0 8px}
+.beat .ctas{display:flex;flex-wrap:wrap;gap:10px}
+.cue{position:absolute;left:0;right:0;margin:0 auto;width:max-content;bottom:10px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.cue i{display:block;width:1px;height:14px;background:var(--ink);animation:cue 1.6s ease-in-out infinite;transform-origin:top}
+@keyframes cue{0%{transform:scaleY(0)}60%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+@media(max-aspect-ratio:1/1){.beat{bottom:max(20px,env(safe-area-inset-bottom));gap:12px}.beat h1,.beat h2{font-size:clamp(22px,6.2vw,30px)}.beat .label,.cue{display:none}.beat .ctas .btn{min-height:44px;padding:0 18px;font-size:15px}}
+.rail{position:absolute;right:max(2.5vw,12px);top:35%;height:30%;width:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.rail b{position:absolute;inset:0;background:var(--red);transform-origin:top;transform:scaleY(0)}
+.loader{position:absolute;right:max(5vw,20px);top:84px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.loader[hidden]{display:none}
+.loader span{display:block;width:90px;height:2px;background:var(--line);overflow:hidden}
+.loader span b{display:block;height:100%;width:0;background:var(--lamp)}
+
+/* services */
+.head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px 60px;align-items:end;margin-bottom:48px}
+.head p{font-size:17px;max-width:52ch}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:12px}
+.card .price{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;font-size:15px;color:var(--muted)}
+.card .price strong{color:var(--ink);font-size:20px;font-stretch:125%;white-space:nowrap}
+.note{margin-top:18px}
+
+/* before / after */
+.ba{position:relative;aspect-ratio:16/9;border-radius:20px;overflow:hidden;border:1px solid var(--line);touch-action:pan-y;cursor:ew-resize;user-select:none;--x:50%}
+.ba img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.ba .before{clip-path:inset(0 calc(100% - var(--x)) 0 0)}
+.ba .handle{position:absolute;top:0;bottom:0;left:var(--x);width:2px;margin-left:-1px;background:var(--lamp);box-shadow:0 0 18px rgba(244,247,251,.6)}
+.ba .handle::after{content:"";position:absolute;top:50%;left:50%;width:46px;height:46px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(10,11,13,.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f4f7fb' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M9 6l-6 6 6 6M15 6l6 6-6 6'/%3E%3C/svg%3E") center/22px no-repeat;border:1px solid rgba(244,247,251,.6);backdrop-filter:blur(4px)}
+.ba .tag{position:absolute;top:16px;padding:6px 12px;border-radius:999px;background:rgba(10,11,13,.65);font-size:13px}
+.ba .tag.l{left:16px}.ba .tag.r{right:16px}
+.ba input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.ba:has(input:focus-visible){outline:2px solid var(--lamp);outline-offset:3px}
+
+/* process */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;position:relative}
+.steps li{padding:26px 24px 28px;border-radius:18px;background:var(--panel);border:1px solid var(--line)}
+.steps svg{width:34px;height:34px;margin-bottom:22px}
+.steps h3{margin-bottom:10px}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+.facts div{padding:22px 24px;border-radius:18px;border:1px solid var(--line)}
+.facts strong{display:block;font-stretch:125%;font-size:17px;margin-bottom:4px}
+
+/* booking */
+.book{background:linear-gradient(180deg,var(--bg),#0e1013)}
+.bookgrid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(32px,6vw,90px)}
+.info{display:flex;flex-direction:column;gap:22px}
+.info dl{margin:12px 0 0;display:grid;gap:14px}
+.info dt{font-size:13px;color:var(--muted)}.info dd{margin:2px 0 0;font-size:17px}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:clamp(22px,3vw,36px)}
+.f{display:flex;flex-direction:column;gap:6px}.f.full{grid-column:1/-1}
+label{font-size:13px;color:var(--muted)}
+input,select,textarea{font:16px/1.4 "Archivo",sans-serif;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:48px;width:100%}
+textarea{min-height:96px;resize:vertical}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa3ad' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:18px;padding-right:40px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--lamp)}
+.err{font-size:13px;color:#ff7a80;min-height:0}
+form .btn{grid-column:1/-1;justify-self:start}
+.done{grid-column:1/-1;display:none;padding:18px 20px;border-radius:14px;background:rgba(224,38,47,.12);border:1px solid rgba(224,38,47,.4)}
+form.sent .done{display:block}
+
+footer{border-top:1px solid var(--line);padding:40px max(5vw,20px) 48px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px 40px;justify-content:space-between;align-items:center}
+
+@media(max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.head{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){.nav{display:none}.top .btn{margin-left:auto}.bookgrid{grid-template-columns:minmax(0,1fr)}.facts{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.film{height:520vh}.grid,.steps{grid-template-columns:minmax(0,1fr)}form{grid-template-columns:minmax(0,1fr)}.rail{display:none}.ba{aspect-ratio:4/3}.brand span{display:none}}
+@media(prefers-reduced-motion:reduce){.cue i{animation:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="hex" viewBox="0 0 32 32"><path d="M16 2.5l11.7 6.75v13.5L16 29.5 4.3 22.75V9.25z" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol></defs></svg>
+
+<header class="top">
+  <a class="brand" href="#film" aria-label="Obsidian Detailing Studio, top of page"><svg style="color:var(--lamp)"><use href="#hex"/></svg><span>OBSIDIAN</span></a>
+  <nav class="nav" aria-label="Main"><a href="#services">Services</a><a href="#results">Results</a><a href="#process">Process</a><a href="#book">Contact</a></nav>
+  <a class="btn red" href="#book">Book a detail</a>
+</header>
+
+<main>
+<section class="film" id="film" aria-label="Film: a car and a superbike detailed from dirty to showroom finish">
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-hidden="true"></canvas>
+    <div class="shade"></div>
+    <div class="cue" data-in="-1" data-out=".05"><i></i>Scroll</div>
+    <div class="beat" data-in="-1" data-out=".07">
+      <div><p class="label">Private detailing for cars and superbikes, Dublin</p><h1>Bring it in dirty. Drive out flawless.</h1></div>
+      <div class="ctas"><a class="btn red" href="#book">Book a detail</a><a class="btn ghost" href="#services">Services</a></div>
+    </div>
+    <div class="beat" data-in=".09" data-out=".17"><h2>Every mile leaves a mark.</h2></div>
+    <div class="beat" data-in=".41" data-out=".51"><h2>Snow foam lifts the grit first.</h2></div>
+    <div class="beat" data-in=".53" data-out=".65"><h2>Rinsed, never scrubbed.</h2></div>
+    <div class="beat" data-in=".88" data-out="9">
+      <h2>Showroom finish. Every time.</h2>
+      <div class="ctas"><a class="btn red" href="#book">Book a detail</a><a class="btn ghost" href="#services">See services</a></div>
+    </div>
+    <div class="rail" aria-hidden="true"><b id="railFill"></b></div>
+    <div class="loader" id="loader" role="status"><span><b id="loadBar"></b></span><em id="loadTxt" style="font-style:normal">Loading film</em></div>
+  </div>
+</section>
+
+<section class="band" id="services">
+  <div class="wrap">
+    <div class="head">
+      <h2>Services for cars and superbikes</h2>
+      <p class="muted">Every job starts with an inspection under studio lighting, and you get a clear price before any work begins.</p>
+    </div>
+    <div class="grid" id="serviceGrid"></div>
+    <p class="note small muted">Sample prices for this demo site.</p>
+  </div>
+</section>
+
+<section class="band" id="results" style="padding-top:0">
+  <div class="wrap">
+    <div class="head">
+      <h2>Drag to see the difference</h2>
+      <p class="muted">The same car and bike, the same studio, before and after a Signature detail.</p>
+    </div>
+    <div class="ba" id="ba">
+      <img src="assets/after.jpg" alt="After: the red superbike and grey saloon spotless and gleaming, headlights on" loading="lazy">
+      <img class="before" src="assets/before.jpg" alt="Before: the same superbike and saloon covered in mud and road grime" loading="lazy">
+      <span class="tag l">Before</span><span class="tag r">After</span>
+      <div class="handle" aria-hidden="true"></div>
+      <input type="range" min="0" max="100" value="50" id="baRange" aria-label="Before and after comparison, percentage of before image shown">
+    </div>
+  </div>
+</section>
+
+<section class="band" id="process" style="padding-top:0">
+  <div class="wrap">
+    <div class="head">
+      <h2>How a detail works</h2>
+      <p class="muted">The same careful order on every vehicle, whether it is a daily saloon or a track-day superbike.</p>
+    </div>
+    <ol class="steps" id="steps"></ol>
+    <div class="facts">
+      <div><strong>Indoor studio</strong><span class="muted">Heated bay under inspection lighting, so nothing gets missed.</span></div>
+      <div><strong>Collection and return</strong><span class="muted">We can collect your car or bike anywhere in Dublin.</span></div>
+      <div><strong>Photos at every stage</strong><span class="muted">Progress pictures sent to your phone while we work.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band book" id="book">
+  <div class="wrap bookgrid">
+    <div class="info">
+      <h2>Book your detail</h2>
+      <p class="muted" style="font-size:17px">Tell us about the vehicle and when suits you. We reply by text to confirm a time and price.</p>
+      <dl>
+        <div><dt>Studio</dt><dd>Dublin, by appointment</dd></div>
+        <div><dt>Hours</dt><dd>Mon to Sat, 8:00 to 18:00</dd></div>
+        <div><dt>Phone</dt><dd>01 234 5678</dd></div>
+        <div><dt>Email</dt><dd>hello@obsidian-detailing.ie</dd></div>
+      </dl>
+    </div>
+    <form id="form" novalidate>
+      <div class="f"><label for="name">Name</label><input id="name" name="name" autocomplete="name" required><span class="err"></span></div>
+      <div class="f"><label for="phone">Mobile</label><input id="phone" name="phone" type="tel" autocomplete="tel" required><span class="err"></span></div>
+      <div class="f"><label for="vehicle">Vehicle type</label><select id="vehicle" name="vehicle" required><option value="">Choose one</option><option>Car</option><option>SUV or 4x4</option><option>Superbike or motorcycle</option><option>Van or other</option></select><span class="err"></span></div>
+      <div class="f"><label for="model">Make and model</label><input id="model" name="model" placeholder="e.g. Audi A8 L"></div>
+      <div class="f"><label for="service">Service</label><select id="service" name="service" required><option value="">Choose a service</option></select><span class="err"></span></div>
+      <div class="f"><label for="date">Preferred date</label><input id="date" name="date" type="date" required><span class="err"></span></div>
+      <div class="f full"><label for="notes">Anything we should know?</label><textarea id="notes" name="notes" placeholder="Swirl marks, stone chips, a show this weekend..."></textarea></div>
+      <button class="btn red" type="submit">Request booking</button>
+      <div class="done" id="done" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#film"><svg style="color:var(--lamp)"><use href="#hex"/></svg>OBSIDIAN</a>
+    <p class="small muted">Demo website by Let There Be Sites. Business name, prices and contact details are sample content.</p>
+  </div>
+</footer>
+
+<script>
+{
+/* ---------- content ---------- */
+const services=[
+  {t:'Signature hand wash',d:'Snow foam pre-wash, two-bucket hand wash, wheels and arches deep cleaned, dried with plush towels.',p:'€85'},
+  {t:'Superbike detail',d:'Fairings, wheels, chain and engine cleaned by hand, with low pressure kept away from bearings and electrics.',p:'€120'},
+  {t:'Interior detail',d:'Leather cleaned and conditioned, carpets extracted, vents, seams and screens steamed and wiped.',p:'€145'},
+  {t:'Paint correction',d:'Machine polishing in one or two stages to remove swirl marks, haze and light scratches.',p:'€395'},
+  {t:'Ceramic coating',d:'A hard, high-gloss protective layer that sheds water and dirt and makes every wash easier.',p:'€795'},
+  {t:'Maintenance plan',d:'A monthly safe wash that keeps a corrected or coated finish looking like day one.',p:'€69/mo'}
+];
+const steps=[
+  ['Inspect','We look over every panel under studio lights and agree the work and price with you.'],
+  ['Decontaminate','Snow foam, hand wash, then iron and tar removers lift what washing alone leaves behind.'],
+  ['Correct','Machine polishing takes out swirls and haze to bring back depth and clarity.'],
+  ['Protect','Wax, sealant or ceramic coating locks in the gloss and keeps dirt from sticking.']
+];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+document.getElementById('serviceGrid').innerHTML=services.map(s=>`<article class="card"><h3>${esc(s.t)}</h3><p class="muted">${esc(s.d)}</p><div class="price"><span>from</span><strong>${esc(s.p)}</strong></div></article>`).join('');
+document.getElementById('steps').innerHTML=steps.map(([t,d])=>`<li><svg style="color:var(--red)"><use href="#hex"/></svg><h3>${esc(t)}</h3><p class="muted">${esc(d)}</p></li>`).join('');
+document.getElementById('service').insertAdjacentHTML('beforeend',services.map(s=>`<option>${esc(s.t)}</option>`).join('')+'<option>Not sure yet</option>');
+
+/* ---------- scroll film ---------- */
+const top=document.querySelector('.top'),film=document.getElementById('film'),stage=document.getElementById('stage'),cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const beats=[...document.querySelectorAll('[data-in]')],railFill=document.getElementById('railFill');
+const loader=document.getElementById('loader'),loadBar=document.getElementById('loadBar'),loadTxt=document.getElementById('loadTxt');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const VW=1280,VH=720,BG='#0a0b0d';
+const video=document.createElement('video');
+video.muted=true;video.playsInline=true;video.preload='auto';video.setAttribute('muted','');video.setAttribute('playsinline','');
+const still=new Image();still.src='assets/first-frame.jpg';
+
+/* scroll progress -> film time (slow on the action, quick over the still foam) */
+const seg=[[0,0],[.18,1.2],[.40,4.3],[.52,7.9],[.74,10],[.84,10.6],[1,12.58]];
+function timeAt(p){for(let i=1;i<seg.length;i++){if(p<=seg[i][0]){const[p0,t0]=seg[i-1],[p1,t1]=seg[i];return t0+(t1-t0)*(p-p0)/(p1-p0)}}return 12.58}
+/* virtual camera for narrow screens: [time, focus x (0-1), zoom-out (0 cover, 1 show both)] */
+const cam=[[0,.25,0],[1.2,.28,0],[2.6,.55,0],[4.3,.62,0],[7.9,.45,.35],[8.4,.6,.2],[9.6,.3,.2],[10.6,.5,1],[13,.5,1]];
+function camAt(t){for(let i=1;i<cam.length;i++){if(t<=cam[i][0]){const a=cam[i-1],b=cam[i];let u=(t-a[0])/(b[0]-a[0]);u=u*u*(3-2*u);return[a[1]+(b[1]-a[1])*u,a[2]+(b[2]-a[2])*u]}}return[.5,1]}
+
+let W=0,H=0,DPR=1,ready=false,cur=0,lastKey='';
+function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);lastKey=''}
+const canvasObserver=new ResizeObserver(resize);canvasObserver.observe(cv);
+
+function draw(src,t){
+  if(!W||!H)return;
+  const cover=Math.max(W/VW,H/VH),vis=W/(VW*cover),k=Math.min(1,Math.max(0,(1-vis)/.5));
+  let[fx,z]=camAt(t);fx=.5+(fx-.5)*k;z*=k;
+  const fit=Math.min(W/(VW*.94),H/VH),s=cover+(Math.min(fit,cover)-cover)*z;
+  const dw=VW*s,dh=VH*s;
+  let dx=W/2-fx*dw;dx=dw>=W?Math.min(0,Math.max(W-dw,dx)):(W-dw)/2;
+  let dy=(H-dh)*(dh>H?.7:.5)-.08*z*H;if(dh>=H)dy=Math.min(0,Math.max(H-dh,dy));
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);
+  ctx.drawImage(src,dx,dy,dw,dh);
+  if(dh<H-1){const f=Math.min(dh*.25,110);
+    let g=ctx.createLinearGradient(0,dy,0,dy+f);g.addColorStop(0,BG);g.addColorStop(1,'rgba(10,11,13,0)');ctx.fillStyle=g;ctx.fillRect(0,dy-2,W,f+2);
+    g=ctx.createLinearGradient(0,dy+dh-f,0,dy+dh);g.addColorStop(0,'rgba(10,11,13,0)');g.addColorStop(1,BG);ctx.fillStyle=g;ctx.fillRect(0,dy+dh-f,W,f+2)}
+}
+function progress(){const r=film.getBoundingClientRect(),span=film.offsetHeight-stage.clientHeight;return span>0?Math.min(1,Math.max(0,-r.top/span)):0}
+function beatsAt(p){for(const b of beats){const a=Math.min(1,Math.max(0,(p-+b.dataset.in)/.025))*Math.min(1,Math.max(0,(+b.dataset.out-p)/.025));
+  b.style.opacity=a;b.style.transform=reduce?'none':`translateY(${(1-a)*18}px)`;b.style.visibility=a>.02?'visible':'hidden'}}
+function tick(){
+  const p=progress(),target=timeAt(p);
+  cur+=(target-cur)*(reduce?1:.18);if(Math.abs(target-cur)<.002)cur=target;
+  if(ready){const ft=Math.min(cur,(video.duration||12.6)-.04);
+    if(!video.seeking&&Math.abs(video.currentTime-ft)>1/48)video.currentTime=ft;
+    const key=video.currentTime.toFixed(3)+'|'+cur.toFixed(3)+'|'+W+'|'+H;if(key!==lastKey){draw(video,cur);lastKey=key}}
+  else if(still.complete&&still.naturalWidth){const key='s|'+W+'|'+H;if(key!==lastKey){draw(still,0);lastKey=key}}
+  beatsAt(p);railFill.style.transform=`scaleY(${p})`;
+  top.classList.toggle('solid',film.getBoundingClientRect().bottom<80);
+  requestAnimationFrame(tick)}
+requestAnimationFrame(tick);
+
+function setLoad(f){loadBar.style.width=Math.round(f*100)+'%';loadTxt.textContent='Loading film '+Math.round(f*100)+'%'}
+video.addEventListener('loadeddata',()=>{ready=true;lastKey='';loader.hidden=true;
+  const pr=video.play();if(pr&&pr.then)pr.then(()=>video.pause()).catch(()=>{})},{once:true});
+video.addEventListener('seeked',()=>{lastKey=''});
+async function loadFilm(){const url='assets/film.mp4';
+  try{const res=await fetch(url);if(!res.ok||!res.body)throw new Error('fetch');
+    const len=+res.headers.get('content-length')||16525120,reader=res.body.getReader(),parts=[];let got=0;
+    for(;;){const{done,value}=await reader.read();if(done)break;parts.push(value);got+=value.length;setLoad(Math.min(1,got/len))}
+    video.src=URL.createObjectURL(new Blob(parts,{type:'video/mp4'}))}
+  catch(e){video.src=url}
+  video.load()}
+loadFilm();
+
+/* ---------- before / after ---------- */
+const ba=document.getElementById('ba'),baRange=document.getElementById('baRange');let dragging=false;
+function setX(v){v=Math.max(0,Math.min(100,v));ba.style.setProperty('--x',v+'%');baRange.value=v}
+function fromPointer(e){const r=ba.getBoundingClientRect();setX((e.clientX-r.left)/r.width*100)}
+ba.addEventListener('pointerdown',e=>{dragging=true;ba.setPointerCapture(e.pointerId);fromPointer(e)});
+ba.addEventListener('pointermove',e=>{if(dragging)fromPointer(e)});
+ba.addEventListener('pointerup',()=>{dragging=false});ba.addEventListener('pointercancel',()=>{dragging=false});
+ba.addEventListener('click',()=>baRange.focus({preventScroll:true}));
+baRange.addEventListener('input',()=>setX(+baRange.value));
+
+/* ---------- booking form (demo: nothing is sent) ---------- */
+const form=document.getElementById('form'),done=document.getElementById('done'),date=document.getElementById('date');
+const today=new Date();date.min=new Date(today.getTime()-today.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+form.addEventListener('submit',e=>{e.preventDefault();let ok=true;
+  for(const el of form.querySelectorAll('[required]')){const err=el.parentElement.querySelector('.err');
+    let msg='';if(!el.value.trim())msg='Please fill this in.';
+    else if(el.id==='phone'&&el.value.replace(/\D/g,'').length<7)msg='Please enter a valid mobile number.';
+    else if(el.id==='date'&&el.value<date.min)msg='Please pick a date from today on.';
+    err.textContent=msg;el.setAttribute('aria-invalid',msg?'true':'false');if(msg&&ok){ok=false;el.focus()}}
+  if(!ok)return;
+  const nm=document.getElementById('name').value.trim(),sv=document.getElementById('service').value;
+  done.textContent=`Thanks, ${nm}. This is a demo site, so no booking was sent. On the live site the studio would text you to confirm your ${sv==='Not sure yet'?'booking':sv.toLowerCase()}.`;
+  form.classList.add('sent')});
+}
+</script>
+</body>
+</html>
